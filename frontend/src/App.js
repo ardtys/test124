@@ -9,8 +9,6 @@ import { Provider } from 'react-redux';
 import { store } from './store';
 
 // Lazy load pages for performance
-const LoginPage = lazy(() => import('./pages/LoginPage'));
-const RegisterPage = lazy(() => import('./pages/RegisterPage'));
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const CreateDocumentPage = lazy(() => import('./pages/CreateDocumentPage'));
 const DocumentDetailsPage = lazy(() => import('./pages/DocumentDetailsPage'));
@@ -24,34 +22,14 @@ const LoadingFallback = () => (
   </div>
 );
 
-// Protected Route Component with Enhanced Authentication
+// Simplified Protected Route Component
 const ProtectedRoute = ({ children }) => {
-  const isAuthenticated = localStorage.getItem('token');
-  const user = JSON.parse(localStorage.getItem('user'));
-
-  // Additional checks can be added here
-  const isValidUser = isAuthenticated && user;
-
-  return isValidUser ? (
-    children
-  ) : (
-    <Navigate to="/login" replace state={{ from: window.location.pathname }} />
-  );
+  return children;
 };
 
-// Role-Based Access Control
-const RoleProtectedRoute = ({ children, allowedRoles }) => {
-  const user = JSON.parse(localStorage.getItem('user'));
-
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return allowedRoles.includes(user.role) ? (
-    children
-  ) : (
-    <Navigate to="/unauthorized" replace />
-  );
+// Simplified Role-Based Access Control
+const RoleProtectedRoute = ({ children }) => {
+  return children;
 };
 
 function App() {
@@ -60,11 +38,6 @@ function App() {
       <Router>
         <Suspense fallback={<LoadingFallback />}>
           <Routes>
-            {/* Public Routes */}
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/unauthorized" element={<div>Unauthorized Access</div>} />
-
             {/* Protected Routes */}
             <Route 
               path="/dashboard" 
@@ -74,7 +47,6 @@ function App() {
                 </ProtectedRoute>
               } 
             />
-
             <Route 
               path="/documents" 
               element={
@@ -83,16 +55,14 @@ function App() {
                 </ProtectedRoute>
               } 
             />
-
             <Route 
               path="/documents/create" 
               element={
-                <RoleProtectedRoute allowedRoles={['admin', 'creator']}>
+                <RoleProtectedRoute>
                   <CreateDocumentPage />
                 </RoleProtectedRoute>
               } 
             />
-
             <Route 
               path="/documents/:id" 
               element={
@@ -101,7 +71,6 @@ function App() {
                 </ProtectedRoute>
               } 
             />
-
             <Route 
               path="/profile" 
               element={
@@ -110,13 +79,11 @@ function App() {
                 </ProtectedRoute>
               } 
             />
-
-            {/* Default Redirect */}
+            {/* Default Route */}
             <Route 
               path="/" 
               element={<Navigate to="/dashboard" replace />} 
             />
-
             {/* 404 Not Found Route */}
             <Route 
               path="*" 

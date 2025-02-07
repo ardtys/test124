@@ -33,6 +33,10 @@ const DashboardPage = () => {
         navigate('/documents/create');
     };
 
+    const handleTransferDocument = () => {
+        navigate('/documents/transfer');
+    };
+
     const handleLogout = async () => {
         try {
             await AuthService.logout();
@@ -54,13 +58,25 @@ const DashboardPage = () => {
     return (
         <div className="container mx-auto px-4 py-8">
             <div className="flex justify-between items-center mb-6">
-                <h1 className="text-3xl font-bold">Dashboard</h1>
+                <h1 className="text-3xl font-bold">XDC Trade</h1>
                 <div className="flex space-x-4">
                     <button 
                         onClick={handleCreateDocument}
                         className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
                     >
                         Create Document
+                    </button>
+                    <button 
+                        // onClick={}
+                        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                    >
+                        Verify Document
+                    </button>
+                    <button 
+                        onClick={handleTransferDocument}
+                        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                    >
+                        Transfer Document
                     </button>
                     <button 
                         onClick={handleLogout}
