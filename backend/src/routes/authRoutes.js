@@ -1,69 +1,88 @@
 const express = require('express');
 const User = require('../models/User');
-const AuthMiddleware = require('../middleware/authMiddleware');
+const { Magic } = require('@magic-sdk/admin');
+const jwt = require('jsonwebtoken');
+
 const router = express.Router();
 
-// Existing login route with 2FA support
-router.post('/login', async (req, res) => {
+// Initialize Magic Admin SDK
+const magic = new Magic(process.env.MAGIC_SECRET_KEY);
+
+router.post('/magic-link', async (req, res) => {
     try {
-        const { email, password, twoFactorToken } = req.body;
+        const { email, publicAddress, didToken } = req.body;
 
-        // Find user
-        const user = await User.findOne({ email }).select('+twoFactorSecret');
-        
+        // Validate input
+        if (!email || !didToken) {
+            return res.status(400).json({ 
+                message: 'Missing required fields' 
+            });
+        }
+
+        // Validate Magic Link token
+        try {
+            await magic.token.validate(didToken);
+        } catch (validationError) {
+            console.error('Magic Link Token Validation Error:', validationError);
+            return res.status(401).json({ 
+                message: 'Invalid Magic Link token' 
+            });
+        }
+
+        // Find or create user
+        let user = await User.findOne({ 
+            $or: [
+                { email },
+                { publicAddress }
+            ]
+        });
+
         if (!user) {
-            return res.status(401).json({ 
-                message: 'Invalid credentials' 
-            });
-        }
-
-        // Check password
-        const isMatch = await user.comparePassword(password);
-        
-        if (!isMatch) {
-            return res.status(401).json({ 
-                message: 'Invalid credentials' 
-            });
-        }
-
-        // Check if 2FA is enabled
-        if (user.twoFactorEnabled) {
-            // Require 2FA token
-            if (!twoFactorToken) {
-                return res.status(206).json({ 
-                    message: 'Two-factor authentication required',
-                    twoFactorRequired: true
+            // Create new user
+            try {
+                user = new User({
+                    email,
+                    username: email.split('@')[0],
+                    publicAddress,
+                    role: 'user'
                 });
-            }
 
-            // Verify 2FA token
-            const isValidToken = user.verifyTwoFactorToken(twoFactorToken);
-            
-            if (!isValidToken) {
-                return res.status(401).json({ 
-                    message: 'Invalid two-factor authentication token' 
+                await user.save();
+            } catch (saveError) {
+                console.error('User Creation Error:', saveError);
+                return res.status(500).json({ 
+                    message: 'Failed to create user account' 
                 });
             }
         }
 
-        // Generate token
-        const token = AuthMiddleware.generateToken(user);
+        // Generate JWT token
+        const token = jwt.sign(
+            { 
+                id: user._id, 
+                email: user.email,
+                role: user.role
+            }, 
+            process.env.JWT_SECRET, 
+            { 
+                expiresIn: '1d'
+            }
+        );
 
-        res.json({
-            message: 'Login successful',
+        // Successful response
+        res.status(200).json({
+            token,
             user: {
                 id: user._id,
-                username: user.username,
                 email: user.email,
-                role: user.role,
-                twoFactorEnabled: user.twoFactorEnabled
-            },
-            token
+                username: user.username,
+                role: user.role
+            }
         });
     } catch (error) {
+        console.error('Authentication Error:', error);
         res.status(500).json({ 
-            message: 'Login failed', 
-            error: error.message 
+            message: 'Authentication failed. Please try again.' 
         });
     }
 });

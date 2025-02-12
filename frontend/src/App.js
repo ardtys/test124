@@ -9,8 +9,11 @@ import { Provider } from 'react-redux';
 import { store } from './store';
 
 // Lazy load pages for performance
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const RegisterPage = lazy(() => import('./pages/RegisterPage'));
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const CreateDocumentPage = lazy(() => import('./pages/CreateDocumentPage'));
+const CreateDocumentWizard = lazy(() => import('./components/CreateDocument/CreateDocumentWizard'));
 const DocumentDetailsPage = lazy(() => import('./pages/DocumentDetailsPage'));
 const DocumentListPage = lazy(() => import('./pages/DocumentListPage'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
@@ -22,14 +25,31 @@ const LoadingFallback = () => (
   </div>
 );
 
-// Simplified Protected Route Component
+// Protected Route Component
 const ProtectedRoute = ({ children }) => {
-  return children;
+  const isAuthenticated = localStorage.getItem('token');
+  
+  return isAuthenticated ? (
+    children
+  ) : (
+    <Navigate to="/login" replace state={{ from: window.location.pathname }} />
+  );
 };
 
-// Simplified Role-Based Access Control
-const RoleProtectedRoute = ({ children }) => {
-  return children;
+// Role-Based Access Control
+const RoleProtectedRoute = ({ children, allowedRoles = ['admin', 'creator'] }) => {
+  const user = JSON.parse(localStorage.getItem('user'));
+  const isAuthenticated = localStorage.getItem('token');
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return allowedRoles.includes(user?.role) ? (
+    children
+  ) : (
+    <Navigate to="/unauthorized" replace />
+  );
 };
 
 function App() {
@@ -38,6 +58,15 @@ function App() {
       <Router>
         <Suspense fallback={<LoadingFallback />}>
           <Routes>
+            {/* Public Routes */}
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/unauthorized" element={
+              <div className="flex justify-center items-center h-screen">
+                <h2 className="text-2xl text-red-500">Unauthorized Access</h2>
+              </div>
+            } />
+
             {/* Protected Routes */}
             <Route 
               path="/dashboard" 
@@ -47,6 +76,8 @@ function App() {
                 </ProtectedRoute>
               } 
             />
+
+            {/* Document Routes */}
             <Route 
               path="/documents" 
               element={
@@ -55,14 +86,27 @@ function App() {
                 </ProtectedRoute>
               } 
             />
+
+            {/* Document Creation Routes */}
             <Route 
               path="/documents/create" 
               element={
-                <RoleProtectedRoute>
+                <ProtectedRoute>
                   <CreateDocumentPage />
+                </ProtectedRoute>
+              } 
+            />
+
+            {/* Document Wizard Route */}
+            <Route 
+              path="/documents/create/wizard" 
+              element={
+                <RoleProtectedRoute allowedRoles={['admin', 'creator']}>
+                  <CreateDocumentWizard />
                 </RoleProtectedRoute>
               } 
             />
+
             <Route 
               path="/documents/:id" 
               element={
@@ -71,6 +115,7 @@ function App() {
                 </ProtectedRoute>
               } 
             />
+
             <Route 
               path="/profile" 
               element={
@@ -79,17 +124,21 @@ function App() {
                 </ProtectedRoute>
               } 
             />
-            {/* Default Route */}
+
+            {/* Default and 404 Routes */}
             <Route 
               path="/" 
               element={<Navigate to="/dashboard" replace />} 
             />
-            {/* 404 Not Found Route */}
+
             <Route 
               path="*" 
               element={
-                <div className="flex justify-center items-center h-screen text-2xl">
-                  404 - Page Not Found
+                <div className="flex justify-center items-center h-screen">
+                  <div className="text-center">
+                    <h1 className="text-4xl font-bold text-gray-800 mb-4">404</h1>
+                    <p className="text-xl text-gray-600">Page Not Found</p>
+                  </div>
                 </div>
               } 
             />

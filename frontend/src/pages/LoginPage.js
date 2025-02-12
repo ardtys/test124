@@ -8,6 +8,7 @@ const LoginPage = () => {
     const [email, setEmail] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
@@ -17,6 +18,13 @@ const LoginPage = () => {
         setError('');
 
         try {
+            // Validate email
+            if (!email || !email.includes('@')) {
+                setError('Please enter a valid email address');
+                setLoading(false);
+                return;
+            }
+
             const userData = await AuthService.login(email);
             
             // Update Redux store
@@ -25,16 +33,15 @@ const LoginPage = () => {
             // Redirect to dashboard
             navigate('/dashboard');
         } catch (err) {
-            setError('Login failed. Please try again.');
-            console.error(err);
-        } finally {
+            console.error('Login Error:', err);
+            setError(err.message || 'Login failed. Please try again.');
             setLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-            <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+        <div className="min-h-screen flex items-center justify-center bg-gray-100">
+            <div className="bg-white p-8 rounded-lg shadow-md w-96">
                 <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
                 
                 {error && (
