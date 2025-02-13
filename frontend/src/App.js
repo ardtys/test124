@@ -9,8 +9,6 @@ import { Provider } from 'react-redux';
 import { store } from './store';
 
 // Lazy load pages for performance
-const LoginPage = lazy(() => import('./pages/LoginPage'));
-const RegisterPage = lazy(() => import('./pages/RegisterPage'));
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const CreateDocumentPage = lazy(() => import('./pages/CreateDocumentPage'));
 const CreateDocumentWizard = lazy(() => import('./components/CreateDocument/CreateDocumentWizard'));
@@ -25,31 +23,14 @@ const LoadingFallback = () => (
   </div>
 );
 
-// Protected Route Component
+// Modified Protected Route Component - Always allows access
 const ProtectedRoute = ({ children }) => {
-  const isAuthenticated = localStorage.getItem('token');
-  
-  return isAuthenticated ? (
-    children
-  ) : (
-    <Navigate to="/login" replace state={{ from: window.location.pathname }} />
-  );
+  return children;
 };
 
-// Role-Based Access Control
-const RoleProtectedRoute = ({ children, allowedRoles = ['admin', 'creator'] }) => {
-  const user = JSON.parse(localStorage.getItem('user'));
-  const isAuthenticated = localStorage.getItem('token');
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return allowedRoles.includes(user?.role) ? (
-    children
-  ) : (
-    <Navigate to="/unauthorized" replace />
-  );
+// Modified Role-Based Access Control - Always allows access
+const RoleProtectedRoute = ({ children }) => {
+  return children;
 };
 
 function App() {
@@ -58,79 +39,20 @@ function App() {
       <Router>
         <Suspense fallback={<LoadingFallback />}>
           <Routes>
-            {/* Public Routes */}
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/unauthorized" element={
-              <div className="flex justify-center items-center h-screen">
-                <h2 className="text-2xl text-red-500">Unauthorized Access</h2>
-              </div>
-            } />
-
-            {/* Protected Routes */}
-            <Route 
-              path="/dashboard" 
-              element={
-                <ProtectedRoute>
-                  <DashboardPage />
-                </ProtectedRoute>
-              } 
-            />
-
+            {/* Removed login and register routes */}
+            
+            {/* Protected Routes - Now accessible without login */}
+            <Route path="/dashboard" element={<DashboardPage />} />
+            
             {/* Document Routes */}
-            <Route 
-              path="/documents" 
-              element={
-                <ProtectedRoute>
-                  <DocumentListPage />
-                </ProtectedRoute>
-              } 
-            />
-
-            {/* Document Creation Routes */}
-            <Route 
-              path="/documents/create" 
-              element={
-                <ProtectedRoute>
-                  <CreateDocumentPage />
-                </ProtectedRoute>
-              } 
-            />
-
-            {/* Document Wizard Route */}
-            <Route 
-              path="/documents/create/wizard" 
-              element={
-                <RoleProtectedRoute allowedRoles={['admin', 'creator']}>
-                  <CreateDocumentWizard />
-                </RoleProtectedRoute>
-              } 
-            />
-
-            <Route 
-              path="/documents/:id" 
-              element={
-                <ProtectedRoute>
-                  <DocumentDetailsPage />
-                </ProtectedRoute>
-              } 
-            />
-
-            <Route 
-              path="/profile" 
-              element={
-                <ProtectedRoute>
-                  <ProfilePage />
-                </ProtectedRoute>
-              } 
-            />
+            <Route path="/documents" element={<DocumentListPage />} />
+            <Route path="/documents/create" element={<CreateDocumentPage />} />
+            <Route path="/documents/create/wizard" element={<CreateDocumentWizard />} />
+            <Route path="/documents/:id" element={<DocumentDetailsPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
 
             {/* Default and 404 Routes */}
-            <Route 
-              path="/" 
-              element={<Navigate to="/dashboard" replace />} 
-            />
-
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route 
               path="*" 
               element={
