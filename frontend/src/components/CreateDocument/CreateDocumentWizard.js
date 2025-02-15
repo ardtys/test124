@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import LoginStep from './steps/LoginStep';
+// import LoginStep from './steps/LoginStep';
 import DocumentTypeStep from './steps/DocumentTypeStep';
 import DocumentUploadStep from './steps/DocumentUploadStep';
 import DocumentFormStep from './steps/DocumentFormStep';
@@ -11,7 +11,7 @@ const CreateDocumentWizard = () => {
     const [step, setStep] = useState(1);
     const [documentData, setDocumentData] = useState({
         documentType: '',
-        loginCredentials: {},
+        // loginCredentials: {},
         uploadedFile: null,
         formData: {}
     });
@@ -35,28 +35,21 @@ const CreateDocumentWizard = () => {
         switch(step) {
             case 1:
                 return (
-                    <LoginStep 
-                        onNext={handleNextStep}
-                        initialData={documentData.loginCredentials}
+                    <DocumentUploadStep 
+                    onNext={handleNextStep}
+                    onPrevious={handlePreviousStep}
+                    initialData={documentData.uploadedFile}
                     />
                 );
-            case 2:
-                return (
+                case 2:
+                    return (
                     <DocumentTypeStep 
                         onNext={handleNextStep}
                         onPrevious={handlePreviousStep}
                         initialData={documentData.documentType}
-                    />
+                        />
                 );
             case 3:
-                return (
-                    <DocumentUploadStep 
-                        onNext={handleNextStep}
-                        onPrevious={handlePreviousStep}
-                        initialData={documentData.uploadedFile}
-                    />
-                );
-            case 4:
                 return (
                     <DocumentFormStep 
                         onNext={handleNextStep}
@@ -65,7 +58,7 @@ const CreateDocumentWizard = () => {
                         uploadedFile={documentData.uploadedFile}
                     />
                 );
-            case 5:
+            case 4:
                 return (
                     <DocumentSuccessStep 
                         documentData={documentData}
@@ -84,7 +77,7 @@ const CreateDocumentWizard = () => {
                 <div className="flex justify-center mb-6">
                     {/* Progress Indicator */}
                     <div className="flex space-x-2">
-                        {[1, 2, 3, 4, 5].map((num) => (
+                        {[1, 2, 3, 4].map((num) => (
                             <div 
                                 key={num}
                                 className={`
