@@ -41,6 +41,103 @@ const DocumentFormStep = ({
                 />
             </div>
 
+            <h2 className="font-bold text-lg mt-10 mb-2">Transferable Record Owner</h2>
+
+            <div className="mb-4">
+                <label className="block mb-2">owner</label>
+                <input
+                    type="text"
+                    className="w-full px-3 py-2 border rounded"
+                />
+            </div>
+            <div className="mb-6">
+                <label className="block mb-2">Holder</label>
+                <input
+                    type="text"
+                    className="w-full px-3 py-2 border rounded"
+                />
+            </div>
+
+            <hr></hr>
+
+            <div className="mb-4 mt-5">
+                <label className="block mb-2">BL Number</label>
+                <input
+                    type="text"
+                    className="w-full px-3 py-2 border rounded"
+                />
+            </div>
+            <div className="mb-4">
+                <label className="block mb-2">Standard Carrier Alpha Code (SCAC)</label>
+                <input
+                    type="text"
+                    className="w-full px-3 py-2 border rounded"
+                />
+            </div>
+            <div className="mb-4">
+                <label className="block mb-2">Signed for the Carrier</label>
+                <input
+                    type="text"
+                    className="w-full px-3 py-2 border rounded"
+                />
+            </div>
+
+            <hr></hr>
+
+            <h2 className="font-bold text-lg mt-5 mb-2">shipper</h2>
+            <div className="mb-5">
+                <label className="block mb-2">name</label>
+                <input
+                    type="text"
+                    className="w-full px-3 py-2 border rounded"
+                />
+            </div>
+
+            <hr></hr>
+
+            <h2 className="font-bold text-lg mt-5 mb-2">Address</h2>
+            <div className="mb-5">
+                <label className="block mb-2">street</label>
+                <input
+                    type="text"
+                    className="w-full px-3 py-2 border rounded"
+                />
+            </div>
+            <div className="mb-5">
+                <label className="block mb-2">country</label>
+                <input
+                    type="text"
+                    className="w-full px-3 py-2 border rounded"
+                />
+            </div>
+            <div className="mb-5">
+                <label className="block mb-2">Onward Inland Routing</label>
+                <input
+                    type="text"
+                    className="w-full px-3 py-2 border rounded"
+                />
+            </div>
+
+            <hr></hr>
+
+            <h2 className="font-bold text-lg mt-5 mb-2">consignee</h2>
+            <div className="mb-5">
+                <label className="block mb-2">is consigned to (e.g. TO ORDER OF, TO ORDER, etc..)</label>
+                <input
+                    type="text"
+                    className="w-full px-3 py-2 border rounded"
+                />
+            </div>
+            <div className="mb-5">
+                <label className="block mb-2">name</label>
+                <input
+                    type="text"
+                    className="w-full px-3 py-2 border rounded"
+                />
+            </div>
+
+            <hr></hr>
+
             {uploadedFile && (
                 <div className="mb-4">
                     <p>Uploaded File: {uploadedFile.name}</p>
